@@ -1,7 +1,9 @@
 package com.example.dicecupcompulsory
 
+import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -10,15 +12,24 @@ import androidx.core.view.get
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import kotlinx.android.synthetic.main.activity_main.*
+import java.sql.Time
+import java.sql.Timestamp
+import java.time.LocalDateTime
+import java.time.LocalDateTime.now
+import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.absoluteValue
 
 class MainActivity : AppCompatActivity() {
+
     private val diceId = intArrayOf(0, R.drawable.dice1,
             R.drawable.dice2,
             R.drawable.dice3,
             R.drawable.dice4,
             R.drawable.dice5,
             R.drawable.dice6)
+    private val HISTORY_NAME = "history"
+    private val mHistory = HashMap<String,List<Int>>()
 
     private val mRandomGenerator = Random()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,10 +40,17 @@ class MainActivity : AppCompatActivity() {
     }
     private fun onClickRoll() {
         val list = mutableListOf<Int>()
+        val current = now()
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val formatted = current.format(formatter)
+
         if (SpDices.selectedItemPosition == 0)
         {
         val e1 = mRandomGenerator.nextInt(6) + 1
             list.add(e1)
+                mHistory.put(formatted,list)
+
         }
         if (SpDices.selectedItemPosition == 1)
         {
@@ -40,6 +58,7 @@ class MainActivity : AppCompatActivity() {
             val e2 = mRandomGenerator.nextInt(6) + 1
             list.add(e1)
             list.add(e2)
+            mHistory.put(formatted,list)
         }
         if (SpDices.selectedItemPosition == 2)
         {
@@ -49,6 +68,7 @@ class MainActivity : AppCompatActivity() {
             list.add(e1)
             list.add(e2)
             list.add(e3)
+            mHistory.put(formatted,list)
         }
         if (SpDices.selectedItemPosition == 3)
         {
@@ -60,6 +80,7 @@ class MainActivity : AppCompatActivity() {
             list.add(e2)
             list.add(e3)
             list.add(e4)
+            mHistory.put(formatted,list)
         }
         if (SpDices.selectedItemPosition == 4)
         {
@@ -73,6 +94,7 @@ class MainActivity : AppCompatActivity() {
             list.add(e3)
             list.add(e4)
             list.add(e5)
+            mHistory.put(formatted,list)
         }
         if (SpDices.selectedItemPosition == 5)
         {
@@ -88,8 +110,11 @@ class MainActivity : AppCompatActivity() {
             list.add(e4)
             list.add(e5)
             list.add(e6)
+            mHistory.put(formatted,list)
         }
         updateDicesWith(list)
+
+        updateHistory()
     }
     private fun updateDicesWith(list: List<Int>) {
         if (list.size == 1) {
@@ -192,4 +217,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }}
+    private fun updateHistory() {
+        val result = mHistory.toList().sortedBy { (value, _) -> value}.toMap()
+        var s = ""
+        result.forEach { p ->  val e1 = p.key; val e2 = p.value;  s += "$e1 - $e2 \n" }
+        tvHistory.text = s
+    }
+
 }
